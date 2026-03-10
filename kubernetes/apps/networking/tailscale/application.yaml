@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-operator
+  namespace: argocd
+spec:
+  source:
+    repoURL: https://pkgs.tailscale.com/helmcharts
+    chart: tailscale-operator
+    targetRevision: "1.x"
+    helm:
+      values: |
+        operatorConfig:
+          hostname: "saradomin-operator"
+        oauth:
+          clientId: ""
+          clientSecret: ""
+  destination:
+    namespace: tailscale
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
