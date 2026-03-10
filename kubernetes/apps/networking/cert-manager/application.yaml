@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: "v1.x"
+      helm:
+        values: |
+          installCRDs: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+    - repoURL: https://github.com/felipemalacarne/saradomin.git
+      targetRevision: HEAD
+      path: kubernetes/apps/networking/cert-manager
+      directory:
+        include: "cluster-issuer.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: networking
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
