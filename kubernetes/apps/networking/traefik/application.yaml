@@ -17,11 +17,10 @@ spec:
           type: LoadBalancer
         ports:
           web:
-            redirectTo:
-              port: websecure
-          websecure:
-            tls:
-              enabled: false  # cert-manager handles TLS
+            redirections:
+              entryPoint:
+                to: websecure
+                scheme: https
         ingressClass:
           enabled: true
           isDefaultClass: true
