@@ -17,6 +17,7 @@ spec:
           clientId: ""
           clientSecret: ""
   destination:
+    server: https://kubernetes.default.svc
     namespace: tailscale
   syncPolicy:
     automated:
