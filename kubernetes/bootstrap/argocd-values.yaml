@@ -1,0 +1,19 @@
+global:
+  domain: argocd.saradomin  # Tailscale-only, no public DNS needed
+
+configs:
+  params:
+    server.insecure: true   # Traefik terminates TLS
+
+server:
+  service:
+    type: LoadBalancer
+    annotations:
+      tailscale.com/expose: "true"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

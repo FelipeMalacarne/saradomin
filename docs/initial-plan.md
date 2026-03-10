@@ -151,7 +151,7 @@ helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd \
   --namespace argocd \
   --values kubernetes/bootstrap/argocd-values.yaml \
-  --version 7.x
+  --version 9.x
 ```
 
 `kubernetes/bootstrap/argocd-values.yaml`:
