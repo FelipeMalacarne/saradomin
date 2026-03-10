@@ -15,6 +15,9 @@ spec:
           replicas: 1
         service:
           type: LoadBalancer
+          loadBalancerClass: tailscale
+          annotations:
+            tailscale.com/hostname: "traefik"
         ingressClass:
           enabled: true
           isDefaultClass: true
