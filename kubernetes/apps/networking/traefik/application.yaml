@@ -15,12 +15,6 @@ spec:
           replicas: 1
         service:
           type: LoadBalancer
-        ports:
-          web:
-            redirections:
-              entryPoint:
-                to: websecure
-                scheme: https
         ingressClass:
           enabled: true
           isDefaultClass: true
