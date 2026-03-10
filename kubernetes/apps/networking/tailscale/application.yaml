@@ -4,10 +4,11 @@ metadata:
   name: tailscale-operator
   namespace: argocd
 spec:
+  project: default
   source:
     repoURL: https://pkgs.tailscale.com/helmcharts
     chart: tailscale-operator
-    targetRevision: "1.x"
+    targetRevision: "1.94"
     helm:
       values: |
         operatorConfig:
