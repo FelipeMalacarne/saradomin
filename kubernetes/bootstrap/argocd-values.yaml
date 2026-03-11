@@ -4,44 +4,46 @@ global:
 configs:
   params:
     server.insecure: true   # Traefik terminates TLS
+  cm:
+    kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
 
 repoServer:
+  env:
+    - name: XDG_CONFIG_HOME
+      value: /.config
+    - name: SOPS_AGE_KEY_FILE
+      value: /.config/sops/age/keys.txt
   volumes:
-    - name: age-key
+    - name: custom-tools
+      emptyDir: {}
+    - name: sops-age
       secret:
         secretName: sops-age
-        defaultMode: 0400
-    - name: cmp-tmp
-      emptyDir: {}
-    - name: ksops-plugin
-      configMap:
-        name: ksops-plugin
-  extraContainers:
-    - name: ksops
-      image: viaductoss/ksops:v4.4.0
-      command: [/var/run/argocd/argocd-cmp-server]
-      env:
-        - name: SOPS_AGE_KEY_FILE
-          value: /app/config/age/keys.txt
+  volumeMounts:
+    - mountPath: /usr/local/bin/kustomize
+      name: custom-tools
+      subPath: kustomize
+    - mountPath: /usr/local/bin/ksops
+      name: custom-tools
+      subPath: ksops
+    - mountPath: /.config/sops/age
+      name: sops-age
+  initContainers:
+    - name: install-ksops
+      image: alpine:3
+      command:
+        - sh
+        - -c
+        - |
+          apk add --no-cache curl tar
+          curl -sL "https://github.com/viaduct-ai/kustomize-sops/releases/download/v4.4.0/ksops_4.4.0_Linux_x86_64.tar.gz" \
+            | tar -xz -C /custom-tools/ ksops
+          curl -sL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz" \
+            | tar -xz -C /custom-tools/ kustomize
+          chmod +x /custom-tools/ksops /custom-tools/kustomize
       volumeMounts:
-        - mountPath: /var/run/argocd
-          name: var-files
-        - mountPath: /home/argocd/cmp-server/plugins
-          name: plugins
-        - mountPath: /home/argocd/cmp-server/config/plugin.yaml
-          subPath: plugin.yaml
-          name: ksops-plugin
-        - mountPath: /app/config/age
-          name: age-key
-        - mountPath: /tmp
-          name: cmp-tmp
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        readOnlyRootFilesystem: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop: [ALL]
+        - mountPath: /custom-tools
+          name: custom-tools
 
 server:
   service:
