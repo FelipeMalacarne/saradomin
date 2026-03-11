@@ -1,3 +1,11 @@
-terraform/.terraform
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
 terraform/terraform.tfvars
+terraform/**/.terraform.lock.hcl
+
+# Secrets (never commit unencrypted)
+**/secrets.yaml
+**/*.dec.yaml
 .env

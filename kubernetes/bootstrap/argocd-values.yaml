@@ -5,6 +5,38 @@ configs:
   params:
     server.insecure: true   # Traefik terminates TLS
 
+repoServer:
+  volumes:
+    - name: age-key
+      secret:
+        secretName: sops-age
+        defaultMode: 0400
+    - name: cmp-tmp
+      emptyDir: {}
+  extraContainers:
+    - name: ksops
+      image: ghcr.io/viaduct-ai/kustomize-sops:v4.3.0
+      command: [/var/run/argocd/argocd-cmp-server]
+      env:
+        - name: SOPS_AGE_KEY_FILE
+          value: /app/config/age/keys.txt
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /app/config/age
+          name: age-key
+        - mountPath: /tmp
+          name: cmp-tmp
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ALL]
+
 server:
   service:
     type: LoadBalancer
