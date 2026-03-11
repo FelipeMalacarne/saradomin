@@ -5,7 +5,6 @@ terraform/*.tfstate.backup
 terraform/terraform.tfvars
 terraform/**/.terraform.lock.hcl
 
-# Secrets (never commit unencrypted)
-**/secrets.yaml
+# Secrets (edit *.dec.yaml, run 'make encrypt', commit *.yaml)
 **/*.dec.yaml
 .env
