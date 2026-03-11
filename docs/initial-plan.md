@@ -1078,32 +1078,71 @@ kubectl get nodes -o json | jq '.items[].status.allocatable | with_entries(selec
 
 ## Secrets Strategy
 
-**Never commit raw secrets.** Two options:
+SOPS + age, decrypted by ArgoCD via KSOPS CMP sidecar. Never commit raw secrets.
 
-### Option A: SOPS (recommended — same workflow everywhere)
+### Setup (one-time)
 ```bash
-# Install SOPS + age
+# Install tools (Arch)
+yay -S sops age
+
+# Generate age keypair — back up keys.txt in Vaultwarden
 age-keygen -o ~/.config/sops/age/keys.txt
 
-# .sops.yaml at repo root:
+# Store private key in cluster
+kubectl create secret generic sops-age \
+  --from-file=keys.txt=$HOME/.config/sops/age/keys.txt \
+  -n argocd
+```
+
+`.sops.yaml` at repo root encrypts all `secrets.yaml` files:
+```yaml
 creation_rules:
-  - path_regex: .*/secrets/.*\.yaml$
-    age: "<your-age-public-key>"
-
-# Encrypt:
-sops --encrypt kubernetes/apps/security/vaultwarden/secrets.yaml > \
-  kubernetes/apps/security/vaultwarden/secrets.enc.yaml
-
-# ArgoCD decrypts via argocd-vault-plugin or helm-secrets
+  - path_regex: kubernetes/.*secrets?\.yaml$
+    age: "<age-public-key>"
 ```
 
-### Option B: Sealed Secrets
+KSOPS sidecar is configured in `kubernetes/bootstrap/argocd-values.yaml` under `repoServer.extraContainers`.
+
+### Per-secret workflow
 ```bash
-helm install sealed-secrets sealed-secrets/sealed-secrets --namespace kube-system
-kubeseal --fetch-cert > pub-cert.pem
-kubectl create secret generic my-secret --dry-run=client -o yaml | \
-  kubeseal --cert pub-cert.pem -o yaml > my-sealed-secret.yaml
+# 1. Write plain secret as secrets.dec.yaml (gitignored)
+vim kubernetes/apps/<service>/secrets.dec.yaml
+
+# 2. Encrypt → secrets.yaml (safe to commit)
+make encrypt
+
+# 3. Commit encrypted file
+git add kubernetes/apps/<service>/secrets.yaml
+git commit -m "feat: add <service> secret"
 ```
+
+To edit an existing secret:
+```bash
+make decrypt   # produces *.dec.yaml locally
+vim kubernetes/apps/<service>/secrets.dec.yaml
+make encrypt   # re-encrypts
+```
+
+### Secrets reference
+
+| Secret name | Namespace | Keys | Service |
+|-------------|-----------|------|---------|
+| `sops-age` | argocd | `keys.txt` | KSOPS sidecar |
+| `cloudflare-api-token` | networking | `api-token` | cert-manager DNS-01 |
+| `pihole-secret` | networking | `webpassword` | Pi-hole admin UI |
+| `longhorn-r2-secret` | longhorn-system | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINTS`, `AWS_CERT` | Longhorn R2 backup |
+| `cloudflared-token` | networking | `token` | Cloudflare tunnel |
+| `operator-oauth` | tailscale | `client_id`, `client_secret` | Tailscale operator |
+| `postgres-secret` | data | `password` | PostgreSQL root |
+| `vaultwarden-secret` | security | `database_url` | Vaultwarden DB |
+
+> `longhorn-r2-secret`, `cloudflared-token`, and `operator-oauth` are created via `kubectl create secret` directly (not SOPS) since they come from external systems (R2, Terraform output, Tailscale OAuth).
+
+### Recovery
+1. Restore Longhorn backup of PostgreSQL PVC → Vaultwarden comes back
+2. Retrieve age private key from Vaultwarden
+3. Recreate `sops-age` secret in argocd namespace
+4. ArgoCD syncs all encrypted secrets automatically
 
 ---
 
@@ -1118,8 +1157,7 @@ terraform/*.tfstate.backup
 terraform/terraform.tfvars
 terraform/**/.terraform.lock.hcl
 
-# Secrets (never commit unencrypted)
-**/secrets.yaml
+# Secrets (edit *.dec.yaml, run 'make encrypt', commit *.yaml)
 **/*.dec.yaml
 .env
 ```
