@@ -4,8 +4,7 @@ metadata:
   name: vaultwarden
   namespace: security
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   ingressClassName: traefik
   rules:
@@ -19,7 +18,3 @@ spec:
                 name: vaultwarden
                 port:
                   number: 80
-  tls:
-    - hosts:
-        - vault.ftm.dev.br
-      secretName: vaultwarden-tls
