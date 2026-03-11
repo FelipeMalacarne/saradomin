@@ -48,6 +48,9 @@ spec:
                       storage: 20Gi
         alertmanager:
           enabled: false
+        prometheus-node-exporter:
+          extraArgs:
+            - --collector.rapl
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
