@@ -36,6 +36,13 @@ spec:
               protocol: TCP
             - containerPort: 80
               protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
           volumeMounts:
             - name: pihole-data
               mountPath: /etc/pihole
