@@ -18,15 +18,15 @@ movie/TV acquisition and management.
 
 ## Access Matrix
 
-| Service     | Access                                          |
-|-------------|-------------------------------------------------|
-| Jellyfin    | Tailscale + Cloudflare → `jellyfin.ftm.dev.br`  |
-| Jellyseerr  | Cloudflare → `request.ftm.dev.br` (public)      |
-| Radarr      | Tailscale only                                  |
-| Sonarr      | Tailscale only                                  |
-| Prowlarr    | Tailscale only                                  |
-| Bazarr      | Tailscale only                                  |
-| qBittorrent | Tailscale only                                  |
+| Service     | Access                                              |
+|-------------|-----------------------------------------------------|
+| Jellyfin    | Cloudflare → `jellyfin.ftm.dev.br` (public) + `jellyfin.saradomin` (Tailscale) |
+| Jellyseerr  | Cloudflare → `request.ftm.dev.br` (public)          |
+| Radarr      | `radarr.saradomin` via Tailscale → ts-traefik        |
+| Sonarr      | `sonarr.saradomin` via Tailscale → ts-traefik        |
+| Prowlarr    | `prowlarr.saradomin` via Tailscale → ts-traefik      |
+| Bazarr      | `bazarr.saradomin` via Tailscale → ts-traefik        |
+| qBittorrent | `qbit.saradomin` via Tailscale → ts-traefik          |
 
 ---
 
@@ -37,19 +37,25 @@ Cloudflare Tunnel
   ├── jellyfin.ftm.dev.br  → Traefik → Jellyfin:8096
   └── request.ftm.dev.br   → Traefik → Jellyseerr:5055
 
-Tailscale (internal)
-  ├── jellyfin      → Jellyfin:8096
-  ├── radarr        → Radarr:7878
-  ├── sonarr        → Sonarr:8989
-  ├── prowlarr      → Prowlarr:9696
-  ├── bazarr        → Bazarr:6767
-  └── qbittorrent   → qBittorrent:8080
+Tailscale → ts-traefik (single proxy pod, already exists)
+  ├── jellyfin.saradomin   → Traefik → Jellyfin:8096
+  ├── radarr.saradomin     → Traefik → Radarr:7878
+  ├── sonarr.saradomin     → Traefik → Sonarr:8989
+  ├── prowlarr.saradomin   → Traefik → Prowlarr:9696
+  ├── bazarr.saradomin     → Traefik → Bazarr:6767
+  └── qbit.saradomin       → Traefik → qBittorrent:8080
 
 Internal cluster (ClusterIP only)
   └── Jellyseerr → Jellyfin, Radarr, Sonarr
       Radarr/Sonarr → qBittorrent (download client)
       Prowlarr → Radarr, Sonarr (indexer push)
 ```
+
+**Why single ts-traefik instead of one proxy pod per service:**
+Each Tailscale LoadBalancer service spawns a proxy StatefulSet (~65 MiB each). Routing
+everything through the existing `ts-traefik` pod (Tailscale hostname: `traefik`) costs
+zero extra proxy pods — Traefik handles host-based routing internally. Pi-hole resolves
+`*.saradomin` to the Tailscale IP of `traefik`.
 
 ---
 
