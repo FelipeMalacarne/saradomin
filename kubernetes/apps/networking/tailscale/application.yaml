@@ -16,6 +16,13 @@ spec:
         oauth:
           clientId: ""
           clientSecret: ""
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: tailscale
