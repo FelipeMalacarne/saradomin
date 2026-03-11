@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+spec:
+  source:
+    repoURL: https://charts.longhorn.io
+    chart: longhorn
+    targetRevision: "1.7.x"
+    helm:
+      values: |
+        defaultSettings:
+          defaultReplicaCount: 1
+          # R2 is S3-compatible; endpoint set in the credential secret
+          backupTarget: "s3://saradomin-longhorn@auto/"
+          backupTargetCredentialSecret: "longhorn-r2-secret"
+        persistence:
+          defaultClass: true
+          defaultClassReplicaCount: 1
+  destination:
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
