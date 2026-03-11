@@ -51,10 +51,12 @@ spec:
         prometheus-node-exporter:
           extraArgs:
             - --collector.rapl
+          podSecurityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            runAsNonRoot: false
           containerSecurityContext:
-            capabilities:
-              add:
-                - DAC_OVERRIDE
+            readOnlyRootFilesystem: true
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
