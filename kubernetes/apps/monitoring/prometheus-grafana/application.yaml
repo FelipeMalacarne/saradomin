@@ -54,7 +54,7 @@ spec:
           containerSecurityContext:
             capabilities:
               add:
-                - DAC_READ_SEARCH
+                - DAC_OVERRIDE
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
