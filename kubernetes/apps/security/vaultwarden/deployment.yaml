@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden
+  namespace: security
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+    spec:
+      containers:
+        - name: vaultwarden
+          image: vaultwarden/server:latest
+          env:
+            # DATABASE_URL stored as full URL in secret — k8s does not interpolate
+            # $(VAR) across env entries, so the full connection string must be atomic.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secret
+                  key: database_url
+            - name: DOMAIN
+              value: "https://vault.ftm.dev.br"
+            - name: SIGNUPS_ALLOWED
+              value: "false"
+          ports:
+            - containerPort: 80
