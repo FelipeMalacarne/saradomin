@@ -4,6 +4,7 @@ metadata:
   name: longhorn
   namespace: argocd
 spec:
+  project: default
   source:
     repoURL: https://charts.longhorn.io
     chart: longhorn
@@ -15,10 +16,13 @@ spec:
           # R2 is S3-compatible; endpoint set in the credential secret
           backupTarget: "s3://saradomin-longhorn@auto/"
           backupTargetCredentialSecret: "longhorn-r2-secret"
+        preUpgradeChecker:
+          jobEnabled: false
         persistence:
           defaultClass: true
           defaultClassReplicaCount: 1
   destination:
+    server: https://kubernetes.default.svc
     namespace: longhorn-system
   syncPolicy:
     automated:
