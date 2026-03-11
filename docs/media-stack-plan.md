@@ -308,22 +308,84 @@ mkdir -p /data/downloads/complete/movies /data/downloads/complete/tv /data/downl
 
 ## Resource Limits
 
-Conservative values tuned for the N97 (16GB RAM, 4-core). Adjust after observing actual usage
-in Grafana.
+### The reality of single-node k3s
 
-| App          | CPU request | CPU limit | Mem request | Mem limit |
-|--------------|-------------|-----------|-------------|-----------|
-| Jellyfin     | 500m        | 4000m     | 512Mi       | 2Gi       |
-| Radarr       | 50m         | 500m      | 128Mi       | 512Mi     |
-| Sonarr       | 50m         | 500m      | 128Mi       | 512Mi     |
-| Prowlarr     | 50m         | 300m      | 64Mi        | 256Mi     |
-| Bazarr       | 25m         | 200m      | 64Mi        | 256Mi     |
-| qBittorrent  | 100m        | 1000m     | 128Mi       | 512Mi     |
-| Jellyseerr   | 50m         | 300m      | 128Mi       | 512Mi     |
-| FlareSolverr | 100m        | 500m      | 128Mi       | 512Mi     |
+**On a single-node cluster, requests matter much less for scheduling** — there is only one
+node, so a pod always gets scheduled regardless of declared requests. What matters:
 
-> Jellyfin gets a high CPU limit because software transcode fallback (when no GPU session is
-> available) is CPU-intensive. The GPU itself is not gated by CPU limit.
+- **Requests** → QoS class and eviction priority. Pods where `actual > limit` are first to
+  be OOM-killed under memory pressure. Pods where `actual ≤ request` (Guaranteed class)
+  are last.
+- **Limits** → the hard ceiling. Exceed the memory limit → OOM killed. Exceed the CPU
+  limit → throttled (not killed, just slow).
+- **Set limits to reflect actual usage**, not wishful thinking. A limit lower than actual
+  usage is not "conservative" — it's a scheduled OOM kill waiting for memory pressure.
+
+### Current cluster reality (actual observed usage)
+
+From `kubectl top` / Grafana at time of writing:
+
+| | Value | Notes |
+|-|-------|-------|
+| Node RAM | 16 GB | |
+| Memory utilization | 44.2% | ~7.1 GB actual in use |
+| Memory requests commitment | 9.84% | ~1.57 GB defined — apps use 4-5× their requests |
+| Memory limits commitment | 22.2% | ~3.55 GB defined — apps routinely exceed limits |
+| CPU requests commitment | 37.1% | ~1,484m |
+| CPU limits commitment | 75% | ~3,000m of 4,000m total |
+
+**Known issue — ArgoCD exceeding its memory limit:**
+
+| | Value |
+|-|-------|
+| Actual usage | 1.09 GiB |
+| Declared request | 256 MiB |
+| Declared limit | 512 MiB |
+| Overage | 217% of limit |
+
+ArgoCD is running at 2× its memory limit. Under current conditions there is enough free
+RAM so the OOM killer ignores it, but adding ~2-3 GB of media stack workloads will raise
+memory pressure. **Fix this before deploying the media stack** by raising ArgoCD's memory
+limit in `kubernetes/bootstrap/argocd-values.yaml`:
+```yaml
+server:
+  resources:
+    requests:
+      memory: 512Mi
+    limits:
+      memory: 1536Mi   # reflects actual ~1.09 GiB + headroom
+```
+Check other components too (repo-server, application-controller) with `kubectl top pod -n argocd`.
+
+### Media stack resource table
+
+N97 = 4 physical cores (no HT) = **4,000m total CPU**.
+Available RAM after current 7.1 GB usage = **~8.9 GB**.
+
+| App          | CPU request | CPU limit | Mem request | Mem limit | Typical actual |
+|--------------|-------------|-----------|-------------|-----------|----------------|
+| Jellyfin     | 200m        | 2000m     | 512Mi       | 2Gi       | 300-600Mi idle, spikes during scan |
+| Radarr       | 50m         | 500m      | 256Mi       | 768Mi     | 200-400Mi |
+| Sonarr       | 50m         | 500m      | 256Mi       | 768Mi     | 200-400Mi |
+| Prowlarr     | 50m         | 300m      | 128Mi       | 384Mi     | 100-200Mi |
+| Bazarr       | 25m         | 200m      | 128Mi       | 384Mi     | 80-150Mi |
+| qBittorrent  | 100m        | 1000m     | 256Mi       | 768Mi     | 200-400Mi (grows with active torrents) |
+| Jellyseerr   | 50m         | 300m      | 256Mi       | 512Mi     | 150-300Mi |
+| FlareSolverr | 100m        | 500m      | 256Mi       | 768Mi     | 200-400Mi (Chromium per request) |
+| **Total**    | **625m**    | **5,300m**| **2,048Mi** | **6.1Gi** | **~1.5-3 GB** |
+
+**Post-media-stack estimate:**
+- Actual usage: ~7.1 GB (current) + ~2 GB (media stack idle) = **~9 GB / 16 GB (56%)**
+- CPU limits commitment rises to ~75% + new limits — fine for a home server
+- ~7 GB remaining as buffer for bursts and OS page cache
+
+> **Why Jellyfin CPU limit is 2000m (not 4000m):** With QuickSync, Jellyfin uses very
+> little CPU during transcode (~5-15% per stream). The 2000m limit prevents library scans
+> from monopolizing all 4 cores and starving every other pod. Sufficient for 1-2 software
+> transcode fallback streams if QuickSync fails.
+
+> **After deploying,** run `kubectl top pod -A` and compare actuals to limits. Raise any
+> limit where actual usage regularly exceeds 80% of the limit.
 
 ---
 
