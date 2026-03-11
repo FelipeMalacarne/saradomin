@@ -22,8 +22,6 @@ spec:
     - repoURL: https://github.com/felipemalacarne/saradomin.git
       targetRevision: HEAD
       path: kubernetes/apps/networking/cert-manager
-      directory:
-        include: "{cluster-issuer.yaml,secrets.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: networking
