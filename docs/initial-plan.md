@@ -34,8 +34,8 @@ saradomin (N97, k3s single-node)
 
 | Service       | Access                                                     |
 |---------------|------------------------------------------------------------|
-| Vaultwarden   | Cloudflare tunnel → `vault.felipemalacarne.com.br`         |
-| Jellyfin      | Tailscale + Cloudflare → `jellyfin.felipemalacarne.com.br` |
+| Vaultwarden   | Cloudflare tunnel → `vault.ftm.dev.br`         |
+| Jellyfin      | Tailscale + Cloudflare → `jellyfin.ftm.dev.br` |
 | Pi-hole admin | Tailscale only                                             |
 | ArgoCD        | Tailscale only                                             |
 | Grafana       | Tailscale only                                             |
@@ -284,7 +284,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: felipe@felipemalacarne.com.br
+    email: felipemalacarne012@gmail.com
     privateKeySecretRef:
       name: letsencrypt-account-key
     solvers:
@@ -620,7 +620,7 @@ spec:
                   name: vaultwarden-secret
                   key: database_url   # value: postgresql://vaultwarden:<pass>@postgres.data.svc.cluster.local/vaultwarden
             - name: DOMAIN
-              value: "https://vault.felipemalacarne.com.br"
+              value: "https://vault.ftm.dev.br"
             - name: SIGNUPS_ALLOWED
               value: "false"   # disable after first account created
           ports:
@@ -638,7 +638,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: vault.felipemalacarne.com.br
+    - host: vault.ftm.dev.br
       http:
         paths:
           - path: /
@@ -650,7 +650,7 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - vault.felipemalacarne.com.br
+        - vault.ftm.dev.br
       secretName: vaultwarden-tls
 ```
 
@@ -747,7 +747,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: jellyfin.felipemalacarne.com.br
+    - host: jellyfin.ftm.dev.br
       http:
         paths:
           - path: /
@@ -866,12 +866,12 @@ variable "cloudflare_account_id" {
 }
 
 variable "cloudflare_zone_id" {
-  description = "Zone ID for felipemalacarne.com.br"
+  description = "Zone ID for ftm.dev.br"
   type        = string
 }
 
 variable "cloudflare_zone" {
-  description = "Domain (e.g. felipemalacarne.com.br)"
+  description = "Domain (e.g. ftm.dev.br)"
   type        = string
 }
 ```
@@ -1129,7 +1129,7 @@ terraform/**/.terraform.lock.hcl
 cloudflare_api_token  = "your-cloudflare-api-token"
 cloudflare_account_id = "your-account-id"
 cloudflare_zone_id    = "your-zone-id"
-cloudflare_zone       = "felipemalacarne.com.br"
+cloudflare_zone       = "ftm.dev.br"
 ```
 
 ---
@@ -1203,7 +1203,7 @@ metadata:
 - [ ] ArgoCD: deploy PostgreSQL
 - [ ] Exec into postgres pod and create `vaultwarden` DB + user
 - [ ] Create `vaultwarden-secret` with full `database_url` value
-- [ ] ArgoCD: deploy Vaultwarden; verify `vault.felipemalacarne.com.br` loads
+- [ ] ArgoCD: deploy Vaultwarden; verify `vault.ftm.dev.br` loads
 - [ ] Confirm `/data/media` is populated on host
 - [ ] ArgoCD: deploy intel-gpu-plugin; verify `gpu.intel.com/i915: "1"` in node allocatable
 - [ ] ArgoCD: deploy Jellyfin; verify QuickSync: `ffmpeg -init_hw_device qsv=hw ...`
@@ -1220,8 +1220,8 @@ metadata:
 - [ ] SSH into saradomin from zaros via Tailscale
 - [ ] ArgoCD dashboard accessible via Tailscale — all apps `Synced` / `Healthy`
 - [ ] Pi-hole blocks ads on test device using Tailscale DNS
-- [ ] `vault.felipemalacarne.com.br` loads Vaultwarden, create account and entry
-- [ ] `jellyfin.felipemalacarne.com.br` loads media library
+- [ ] `vault.ftm.dev.br` loads Vaultwarden, create account and entry
+- [ ] `jellyfin.ftm.dev.br` loads media library
 - [ ] Jellyfin hardware transcode confirmed (`ffmpeg` uses `h264_qsv`)
 - [ ] Jellyfin accessible via Tailscale IP directly
 - [ ] Longhorn UI shows backup target connected to R2 (`saradomin-longhorn` bucket)

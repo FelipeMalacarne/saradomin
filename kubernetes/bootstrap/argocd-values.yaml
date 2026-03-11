@@ -8,8 +8,10 @@ configs:
 server:
   service:
     type: LoadBalancer
+    loadBalancerClass: tailscale
     annotations:
       tailscale.com/expose: "true"
+      tailscale.com/hostname: "argocd"
   resources:
     requests:
       cpu: 100m
