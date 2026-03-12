@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: saradomin
+      containers:
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:5
+          env:
+            - name: PUID
+              value: "1001"
+            - name: PGID
+              value: "1001"
+            - name: TZ
+              value: "America/Sao_Paulo"
+            - name: WEBUI_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 768Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /data/downloads
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config
+        - name: data
+          hostPath:
+            path: /data/downloads
+            type: Directory
