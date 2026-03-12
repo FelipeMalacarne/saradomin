@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recyclarr-config
+  namespace: media
+data:
+  recyclarr.yml: |
+    radarr:
+      main:
+        base_url: http://radarr.media.svc.cluster.local:7878
+        api_key: !env_var RADARR_API_KEY
+        quality_definition:
+          type: movie
+        quality_profiles:
+          - name: HD Bluray + WEB
+            reset_unmatched_scores:
+              enabled: true
+            upgrade:
+              allowed: true
+              until_quality: Bluray-1080p
+              until_score: 10000
+        custom_formats:
+          - trash_ids:
+              - ed38b889b31be83fda192888e2286d83  # BR-DISK
+              - 90a6f9a284dff5103f6346090e6280c8  # LQ
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: -10000
+    sonarr:
+      main:
+        base_url: http://sonarr.media.svc.cluster.local:8989
+        api_key: !env_var SONARR_API_KEY
+        quality_definition:
+          type: series
+        quality_profiles:
+          - name: HD Bluray + WEB
+            upgrade:
+              allowed: true
+              until_quality: Bluray-1080p

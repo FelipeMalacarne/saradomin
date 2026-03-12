@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: recyclarr
+  namespace: media
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: recyclarr
+              image: ghcr.io/recyclarr/recyclarr:7
+              args: ["sync"]
+              env:
+                - name: RADARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: recyclarr-secret
+                      key: radarr_api_key
+                - name: SONARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: recyclarr-secret
+                      key: sonarr_api_key
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+              volumeMounts:
+                - name: recyclarr-config
+                  mountPath: /config/recyclarr.yml
+                  subPath: recyclarr.yml
+                - name: recyclarr-cache
+                  mountPath: /config
+          volumes:
+            - name: recyclarr-config
+              configMap:
+                name: recyclarr-config
+            - name: recyclarr-cache
+              persistentVolumeClaim:
+                claimName: recyclarr-cache
