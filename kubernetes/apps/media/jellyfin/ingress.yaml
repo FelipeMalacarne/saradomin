@@ -1,8 +1,8 @@
-# Ingress for Cloudflare tunnel path — Traefik routes by Host header
+# Public access via Cloudflare tunnel — Traefik HTTP (tunnel handles TLS)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jellyfin
+  name: jellyfin-public
   namespace: media
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
@@ -19,6 +19,19 @@ spec:
                 name: jellyfin
                 port:
                   number: 8096
+---
+# Private access via Tailscale — HTTPS with *.saradomin wildcard cert
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyfin-internal
+  namespace: media
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
     - host: jellyfin.saradomin
       http:
         paths:
