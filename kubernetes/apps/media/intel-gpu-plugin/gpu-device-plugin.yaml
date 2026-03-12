@@ -4,5 +4,4 @@ metadata:
   name: gpudeviceplugin-sample
   namespace: media
 spec:
-  image: intel/intel-gpu-plugin:latest
   sharedDevNum: 1
