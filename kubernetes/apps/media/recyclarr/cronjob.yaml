@@ -36,12 +36,16 @@ spec:
                 - name: recyclarr-config
                   mountPath: /config/recyclarr.yml
                   subPath: recyclarr.yml
-                - name: recyclarr-cache
+                - name: recyclarr-data
                   mountPath: /config
+                - name: recyclarr-git-cache
+                  mountPath: /config/cache   # emptyDir overlays Longhorn here — avoids git rename issues on Longhorn
           volumes:
             - name: recyclarr-config
               configMap:
                 name: recyclarr-config
-            - name: recyclarr-cache
+            - name: recyclarr-data
               persistentVolumeClaim:
                 claimName: recyclarr-cache
+            - name: recyclarr-git-cache
+              emptyDir: {}
