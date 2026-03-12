@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - pvc.yaml
+  - configmap-dnsmasq.yaml
 generators:
   - ksops.yaml

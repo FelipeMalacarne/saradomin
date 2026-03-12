@@ -46,10 +46,16 @@ spec:
           volumeMounts:
             - name: pihole-data
               mountPath: /etc/pihole
+            - name: dnsmasq-saradomin
+              mountPath: /etc/dnsmasq.d/02-saradomin.conf
+              subPath: 02-saradomin.conf
       volumes:
         - name: pihole-data
           persistentVolumeClaim:
             claimName: pihole-pvc
+        - name: dnsmasq-saradomin
+          configMap:
+            name: pihole-dnsmasq-saradomin
 ---
 # Tailscale-only admin UI service
 apiVersion: v1

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-dnsmasq-saradomin
+  namespace: networking
+data:
+  02-saradomin.conf: |
+    address=/.saradomin/100.79.221.47
