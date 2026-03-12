@@ -44,6 +44,10 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "saradomin_tunnel_con
         service  = "http://traefik.networking.svc.cluster.local:80"
       },
       {
+        hostname = "request.${var.zone}"
+        service  = "http://traefik.networking.svc.cluster.local:80"
+      },
+      {
         service = "http_status:404"
       }
     ]
@@ -68,4 +72,14 @@ resource "cloudflare_dns_record" "jellyfin_dns" {
   ttl     = 1
   proxied = true
   comment = "[terraform] saradomin Jellyfin"
+}
+
+resource "cloudflare_dns_record" "seerr_dns" {
+  zone_id = var.zone_id
+  name    = "request.${var.zone}"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.saradomin_tunnel.id}.cfargotunnel.com"
+  type    = "CNAME"
+  ttl     = 1
+  proxied = true
+  comment = "[terraform] saradomin Seerr"
 }
