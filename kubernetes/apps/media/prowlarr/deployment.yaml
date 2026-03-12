@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: saradomin
+      containers:
+        - name: prowlarr
+          image: linuxserver/prowlarr:1
+          env:
+            - name: PUID
+              value: "1001"
+            - name: PGID
+              value: "1001"
+            - name: TZ
+              value: "America/Sao_Paulo"
+          ports:
+            - containerPort: 9696
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-config
