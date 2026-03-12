@@ -4,5 +4,6 @@ resources:
   - deployment.yaml
   - pvc.yaml
   - configmap-dnsmasq.yaml
+  - ingress.yaml
 generators:
   - ksops.yaml

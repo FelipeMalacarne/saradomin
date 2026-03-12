@@ -47,11 +47,14 @@ repoServer:
 
 server:
   service:
-    type: LoadBalancer
-    loadBalancerClass: tailscale
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: traefik
     annotations:
-      tailscale.com/expose: "true"
-      tailscale.com/hostname: "argocd"
+      traefik.ingress.kubernetes.io/router.entrypoints: web
+    hosts:
+      - argocd.saradomin
   resources:
     requests:
       cpu: 100m

@@ -13,10 +13,14 @@ spec:
       values: |
         grafana:
           service:
-            type: LoadBalancer
-            loadBalancerClass: tailscale
+            type: ClusterIP
+          ingress:
+            enabled: true
+            ingressClassName: traefik
             annotations:
-              tailscale.com/hostname: "grafana"
+              traefik.ingress.kubernetes.io/router.entrypoints: web
+            hosts:
+              - grafana.saradomin
           persistence:
             enabled: true
             storageClassName: longhorn

@@ -59,17 +59,13 @@ spec:
           configMap:
             name: pihole-dnsmasq-saradomin
 ---
-# Tailscale-only admin UI service
 apiVersion: v1
 kind: Service
 metadata:
   name: pihole-admin
   namespace: networking
-  annotations:
-    tailscale.com/hostname: "pihole"
 spec:
-  type: LoadBalancer
-  loadBalancerClass: tailscale
+  type: ClusterIP
   selector:
     app: pihole
   ports:

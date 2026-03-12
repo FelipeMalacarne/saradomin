@@ -19,3 +19,13 @@ spec:
                 name: jellyfin
                 port:
                   number: 8096
+    - host: jellyfin.saradomin
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyfin
+                port:
+                  number: 8096
