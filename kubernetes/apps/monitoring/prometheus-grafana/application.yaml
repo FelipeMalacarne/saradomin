@@ -39,6 +39,19 @@ spec:
               limits:
                 cpu: 500m
                 memory: 1024Mi
+            additionalScrapeConfigs:
+              - job_name: exportarr-radarr
+                static_configs:
+                  - targets: ['exportarr.media.svc.cluster.local:9707']
+              - job_name: exportarr-sonarr
+                static_configs:
+                  - targets: ['exportarr.media.svc.cluster.local:9708']
+              - job_name: exportarr-prowlarr
+                static_configs:
+                  - targets: ['exportarr.media.svc.cluster.local:9709']
+              - job_name: exportarr-bazarr
+                static_configs:
+                  - targets: ['exportarr.media.svc.cluster.local:9710']
             storageSpec:
               volumeClaimTemplate:
                 spec:
