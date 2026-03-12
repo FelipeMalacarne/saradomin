@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: saradomin
       containers:
         - name: prowlarr
-          image: linuxserver/prowlarr:1
+          image: linuxserver/prowlarr:latest
           env:
             - name: PUID
               value: "1001"

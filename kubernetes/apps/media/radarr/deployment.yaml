@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: saradomin
       containers:
         - name: radarr
-          image: linuxserver/radarr:5
+          image: linuxserver/radarr:latest
           env:
             - name: PUID
               value: "1001"

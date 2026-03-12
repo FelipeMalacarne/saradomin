@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: saradomin
       containers:
         - name: qbittorrent
-          image: linuxserver/qbittorrent:5
+          image: linuxserver/qbittorrent:latest
           env:
             - name: PUID
               value: "1001"
