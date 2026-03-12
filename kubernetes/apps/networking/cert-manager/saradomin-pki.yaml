@@ -8,12 +8,12 @@ metadata:
 spec:
   selfSigned: {}
 ---
-# Step 2: CA certificate (lives in cert-manager namespace so ClusterIssuer can read it)
+# Step 2: CA certificate (lives in networking namespace where cert-manager runs)
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: saradomin-ca
-  namespace: cert-manager
+  namespace: networking
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
