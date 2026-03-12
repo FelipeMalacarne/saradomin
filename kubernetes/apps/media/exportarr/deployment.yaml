@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exportarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: exportarr
+  template:
+    metadata:
+      labels:
+        app: exportarr
+    spec:
+      containers:
+        - name: exportarr-radarr
+          image: ghcr.io/onedr0p/exportarr:v2
+          args: ["radarr"]
+          env:
+            - name: PORT
+              value: "9707"
+            - name: URL
+              value: "http://radarr.media.svc.cluster.local:7878"
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: exportarr-secret
+                  key: radarr_api_key
+          ports:
+            - containerPort: 9707
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        - name: exportarr-sonarr
+          image: ghcr.io/onedr0p/exportarr:v2
+          args: ["sonarr"]
+          env:
+            - name: PORT
+              value: "9708"
+            - name: URL
+              value: "http://sonarr.media.svc.cluster.local:8989"
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: exportarr-secret
+                  key: sonarr_api_key
+          ports:
+            - containerPort: 9708
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        - name: exportarr-prowlarr
+          image: ghcr.io/onedr0p/exportarr:v2
+          args: ["prowlarr"]
+          env:
+            - name: PORT
+              value: "9709"
+            - name: URL
+              value: "http://prowlarr.media.svc.cluster.local:9696"
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: exportarr-secret
+                  key: prowlarr_api_key
+          ports:
+            - containerPort: 9709
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        - name: exportarr-bazarr
+          image: ghcr.io/onedr0p/exportarr:v2
+          args: ["bazarr"]
+          env:
+            - name: PORT
+              value: "9710"
+            - name: URL
+              value: "http://bazarr.media.svc.cluster.local:6767"
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: exportarr-secret
+                  key: bazarr_api_key
+          ports:
+            - containerPort: 9710
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
