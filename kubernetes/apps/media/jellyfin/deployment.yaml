@@ -22,7 +22,7 @@ spec:
             requests:
               cpu: 200m
               memory: 512Mi
-              gpu.intel.com/i915: 1   # Intel QuickSync via device plugin
+              gpu.intel.com/i915: 1
             limits:
               cpu: 2000m
               memory: 2048Mi
