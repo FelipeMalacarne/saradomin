@@ -52,6 +52,15 @@ spec:
   dnsNames:
     - "*.saradomin"
     - "saradomin"
+    - "argocd.saradomin"
+    - "grafana.saradomin"
+    - "jellyfin.saradomin"
+    - "pihole.saradomin"
+    - "qbit.saradomin"
+    - "radarr.saradomin"
+    - "sonarr.saradomin"
+    - "prowlarr.saradomin"
+    - "bazarr.saradomin"
   issuerRef:
     name: saradomin-ca-issuer
     kind: ClusterIssuer
