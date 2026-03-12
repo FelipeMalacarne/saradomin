@@ -12,14 +12,14 @@ data:
         quality_definition:
           type: movie
         quality_profiles:
-          - name: Ultra-HD              # existing profile — no qualities needed
+          - name: Ultra-HD
             reset_unmatched_scores:
               enabled: true
             upgrade:
               allowed: true
               until_quality: Bluray-2160p
               until_score: 10000
-          - name: HD-1080p             # existing profile
+          - name: HD-1080p
             reset_unmatched_scores:
               enabled: true
             upgrade:
@@ -27,7 +27,6 @@ data:
               until_quality: Bluray-1080p
               until_score: 10000
         custom_formats:
-          # Hard penalize garbage
           - trash_ids:
               - ed38b889b31be83fda192888e2286d83  # BR-DISK
               - 90a6f9a284dff5103f6346090e6280c8  # LQ
@@ -36,7 +35,8 @@ data:
                 score: -10000
               - name: HD-1080p
                 score: -10000
-          # Prefer HDR over SDR within the same quality tier
+              - name: PT-BR Dub
+                score: -10000
           - trash_ids:
               - 493b6d1dbec3c3364c59d7607f7e3405  # HDR (catch-all)
               - b337d6812e06c200ec9a2d3cfa9d20a7  # DV Boost
@@ -44,7 +44,6 @@ data:
             assign_scores_to:
               - name: Ultra-HD
                 score: 500
-          # Penalize SDR 4K
           - trash_ids:
               - 9c38ebb7384dada637be8899efa68e6f  # SDR
             assign_scores_to:
@@ -73,10 +72,12 @@ data:
               until_score: 10000
         custom_formats:
           - trash_ids:
-              - ed38b889b31be83fda192888e2286d83  # BR-DISK
-              - 90a6f9a284dff5103f6346090e6280c8  # LQ
+              - 85c61753df5da1fb2aab6f2a47426b09  # BR-DISK (Sonarr)
+              - 9c11cd3f07101cdba90a2d81cf0e56b4  # LQ (Sonarr)
             assign_scores_to:
               - name: Ultra-HD
                 score: -10000
               - name: HD-1080p
+                score: -10000
+              - name: PT-BR Dub
                 score: -10000
