@@ -1,0 +1,30 @@
+# ClusterIP — used by Traefik ingress (Cloudflare tunnel path)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  type: ClusterIP
+  selector:
+    app: jellyfin
+  ports:
+    - port: 8096
+      targetPort: 8096
+---
+# Tailscale LoadBalancer — direct private access from any Tailscale device
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin-tailscale
+  namespace: media
+  annotations:
+    tailscale.com/hostname: "jellyfin"
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale
+  selector:
+    app: jellyfin
+  ports:
+    - port: 8096
+      targetPort: 8096
