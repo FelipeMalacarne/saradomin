@@ -17,15 +17,32 @@ data:
               enabled: true
             upgrade:
               allowed: true
-              until_quality: Bluray-1080p
+              until_quality: Remux-2160p
               until_score: 10000
         custom_formats:
+          # Hard penalize garbage
           - trash_ids:
               - ed38b889b31be83fda192888e2286d83  # BR-DISK
               - 90a6f9a284dff5103f6346090e6280c8  # LQ
             assign_scores_to:
               - name: HD Bluray + WEB
                 score: -10000
+          # Reward HDR formats — pushes 4K HDR above 4K SDR and 1080p
+          - trash_ids:
+              - e23edd2482476e595fb990b12e7c609c  # DV (Dolby Vision)
+              - 58d6a88f13e2db7f5059c41047876f00  # HDR10
+              - a3d82cbef5039cde1e943bacbf96b728  # HDR10+
+              - 55d53828b9d81cbe20b02ec21d663f9c  # HLG
+              - e61e28db95d22bedcadf030b8f156d96  # HDR (undefined)
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: 500
+          # Slight penalty for SDR 4K (prefer HDR when available at same quality tier)
+          - trash_ids:
+              - 9c38ebb7384dada637be8899efa68e6f  # SDR
+            assign_scores_to:
+              - name: HD Bluray + WEB
+                score: -100
     sonarr:
       sonarr-main:
         base_url: http://sonarr.media.svc.cluster.local:8989
@@ -36,4 +53,4 @@ data:
           - name: HD Bluray + WEB
             upgrade:
               allowed: true
-              until_quality: Bluray-1080p
+              until_quality: Bluray-2160p
