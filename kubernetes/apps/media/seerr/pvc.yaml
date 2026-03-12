@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: seerr-config
   namespace: media
+  annotations:
+    recurring-job-group.longhorn.io/default: enabled
 spec:
   accessModes:
     - ReadWriteOnce
