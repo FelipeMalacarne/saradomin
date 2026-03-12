@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns-saradomin
+  namespace: networking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coredns-saradomin
+  template:
+    metadata:
+      labels:
+        app: coredns-saradomin
+    spec:
+      containers:
+        - name: coredns
+          image: coredns/coredns:latest
+          args: ["-conf", "/etc/coredns/Corefile"]
+          ports:
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 53
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/coredns
+      volumes:
+        - name: config
+          configMap:
+            name: coredns-saradomin
