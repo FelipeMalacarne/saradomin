@@ -37,7 +37,13 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: torrentio
+              mountPath: /config/Definitions/Custom/torrentio.yml
+              subPath: torrentio.yml
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: prowlarr-config
+        - name: torrentio
+          configMap:
+            name: prowlarr-torrentio
