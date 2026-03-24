@@ -15,11 +15,6 @@ spec:
       labels:
         app: pihole
     spec:
-      # hostNetwork exposes port 53 directly on the node IP — required because
-      # DNS clients always dial port 53; NodePort (30000+) range won't work here.
-      # systemd-resolved must be disabled or moved off port 53 first.
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: pihole
           image: pihole/pihole:latest
