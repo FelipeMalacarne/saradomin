@@ -5,37 +5,41 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://charts.longhorn.io
-    chart: longhorn
-    targetRevision: "1.7.x"
-    helm:
-      values: |
-        defaultSettings:
-          defaultReplicaCount: 1
-          # R2 is S3-compatible; endpoint set in the credential secret
-          backupTarget: "s3://saradomin-longhorn@auto/"
-          backupTargetCredentialSecret: "longhorn-r2-secret"
-        recurringJobs:
-          - name: daily-backup
-            task: backup
-            groups:
-              - default
-            cron: "0 3 * * *"
-            retain: 7
-            concurrency: 1
-        preUpgradeChecker:
-          jobEnabled: false
-        persistence:
-          defaultClass: true
-          defaultClassReplicaCount: 1
-        ingress:
-          enabled: true
-          ingressClassName: traefik
-          host: longhorn.saradomin
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: websecure
-            traefik.ingress.kubernetes.io/router.tls: "true"
+  sources:
+    - repoURL: https://charts.longhorn.io
+      chart: longhorn
+      targetRevision: "1.7.x"
+      helm:
+        values: |
+          defaultSettings:
+            defaultReplicaCount: 1
+            backupTarget: "s3://saradomin-longhorn@auto/"
+            backupTargetCredentialSecret: "longhorn-r2-secret"
+          recurringJobs:
+            - name: daily-backup
+              task: backup
+              groups:
+                - default
+              cron: "0 3 * * *"
+              retain: 7
+              concurrency: 1
+          preUpgradeChecker:
+            jobEnabled: false
+          persistence:
+            defaultClass: true
+            defaultClassReplicaCount: 1
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            host: longhorn.saradomin
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+    - repoURL: https://github.com/felipemalacarne/saradomin.git
+      targetRevision: HEAD
+      path: kubernetes/apps/data/longhorn
+      directory:
+        include: "secrets.yaml"
   destination:
     server: https://kubernetes.default.svc
     namespace: longhorn-system
